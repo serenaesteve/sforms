@@ -1,0 +1,23 @@
+[Unit]
+Description=sforms, formularios gota a gota (datos en el SBD de producción)
+After=network-online.target sbd.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sforms
+WorkingDirectory=/srv/sforms/app
+Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /srv/sforms/app/servidor.py --host 127.0.0.1 --puerto 8106 --datos /srv/sforms/datos --publico
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/sforms/datos
+PrivateTmp=true
+UMask=0077
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

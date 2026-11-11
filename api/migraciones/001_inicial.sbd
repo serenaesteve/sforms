@@ -1,0 +1,54 @@
+-- =====================================================================
+--  Migración 001 · sforms: cuentas, formularios y respuestas
+-- =====================================================================
+--  Las preguntas de un formulario van juntas, como JSON, en «contenido»:
+--  se editan y se guardan de una vez (autoguardado) y su orden es el del
+--  propio texto. Cada respuesta guarda lo que se contestó, también como
+--  JSON, con la clave de cada pregunta: si luego se borra o se cambia una
+--  pregunta, las respuestas antiguas no se pierden.
+--  Las horas van en Europe/Madrid; las pone el servidor como parámetro.
+-- =====================================================================
+
+crear tabla ajustes {
+  clave  texto clave
+  valor  texto obligatorio
+}
+
+crear tabla usuarios {
+  id               entero clave
+  correo           texto(120) unico obligatorio
+  nombre           texto(80) obligatorio comprobar longitud(nombre) >= 1
+  hash_contrasena  texto obligatorio
+  creado_en        fechahora
+  ultimo_acceso    fechahora
+}
+
+-- Se guarda la huella del token, nunca el token.
+crear tabla sesiones {
+  token_hash  texto clave
+  usuario_id  entero obligatorio -> usuarios(id) al borrar cascada
+  expira_en   fechahora obligatorio
+}
+indexar sesiones (usuario_id)
+
+crear tabla formularios {
+  id          entero clave
+  usuario_id  entero obligatorio -> usuarios(id) al borrar cascada
+  enlace      texto(16) unico obligatorio      -- lo que va en /f/…: aleatorio, no se adivina
+  titulo      texto(200) obligatorio
+  color       texto(12) = "agua"
+  contenido   texto obligatorio                -- descripción, preguntas y ajustes (JSON)
+  aceptando   logico = verdadero
+  creado_en   fechahora
+  cambiado_en fechahora
+}
+indexar formularios (usuario_id)
+
+crear tabla respuestas {
+  id             entero clave
+  formulario_id  entero obligatorio -> formularios(id) al borrar cascada
+  enviada_en     fechahora obligatorio
+  valores        texto obligatorio             -- { "id de pregunta": respuesta } (JSON)
+  huella         texto(64)                     -- navegador que respondió, para «una respuesta por persona»
+}
+indexar respuestas (formulario_id)

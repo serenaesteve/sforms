@@ -1,0 +1,167 @@
+/* El formulario: lo comparten el editor y la página de responder */
+
+.columna { position: relative; width: min(720px, calc(100% - 2 * var(--e4))); margin: 0 auto; display: grid; gap: var(--e4); }
+
+/* ---------- cabecera: la primera gota, con el color del formulario arriba ---------- */
+.cabecera {
+  position: relative; overflow: hidden; padding: calc(var(--e6) + 10px) var(--e6) var(--e6);
+  background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r-xl); box-shadow: var(--sombra-hoja);
+}
+.cabecera::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 12px;
+  background: linear-gradient(90deg, var(--a), oklch(calc(var(--a-l) + 16%) var(--a-c) calc(var(--h) + 30)));
+  box-shadow: inset 0 -2px 0 oklch(100% 0 0 / .25);
+}
+.cabecera__titulo { font-size: var(--t-xxl); }
+.cabecera__descripcion { margin-top: var(--e3); color: var(--tinta-2); white-space: pre-line; max-width: 62ch; }
+.cabecera__pie { margin-top: var(--e4); padding-top: var(--e3); border-top: 1px solid var(--linea); font-size: var(--t-s); color: var(--tinta-3); }
+.obligatoria { color: var(--peligro); font-weight: 600; }
+
+/* ---------- cada pregunta: una gota ---------- */
+.pregunta {
+  position: relative; padding: var(--e5) var(--e6) var(--e6);
+  background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--r-l); box-shadow: var(--sombra-hoja);
+  transition: border-color var(--d) ease, box-shadow var(--d) ease;
+  scroll-margin: 96px;
+}
+.pregunta__titulo { font-size: var(--t-l); font-weight: 600; line-height: 1.35; white-space: pre-line; overflow-wrap: anywhere; }
+.pregunta__titulo .obligatoria { margin-left: 4px; }
+.pregunta__ayuda { margin-top: var(--e1); font-size: var(--t-s); color: var(--tinta-3); white-space: pre-line; }
+.pregunta__campo { margin-top: var(--e4); }
+.pregunta[data-error] { border-color: var(--peligro); box-shadow: 0 0 0 1px var(--peligro), var(--sombra-hoja); }
+.pregunta .error-campo { margin-top: var(--e3); }
+
+/* sección: la gota se ensancha y lleva su número */
+.pregunta--seccion { padding-top: var(--e6); background: color-mix(in oklab, var(--hoja) 85%, var(--a-velo)); }
+.pregunta--seccion .pregunta__titulo { font-family: var(--f-titulo); font-style: italic; font-weight: 500; font-size: var(--t-xl); }
+.seccion-etiqueta {
+  position: absolute; top: -13px; left: var(--e6); padding: 3px var(--e3); border-radius: var(--pastilla);
+  background: var(--a); color: var(--a-texto); font-size: var(--t-xs); font-weight: 700; letter-spacing: .04em;
+}
+
+/* ---------- campos de respuesta ---------- */
+.entrada--linea {
+  min-height: 44px; padding: var(--e2) 0; border: 0; border-bottom: 1.5px solid var(--linea-fuerte); border-radius: 0; background: transparent;
+  max-width: 100%;
+}
+.entrada--linea:focus { box-shadow: none; border-bottom-color: var(--a); }
+input.entrada--linea { width: min(100%, 420px); }
+textarea.entrada--linea { min-height: 44px; resize: none; overflow: hidden; }
+.entrada--linea:disabled { opacity: 1; background: transparent; color: var(--tinta-3); border-bottom-style: dotted; }
+.entrada--desplegable { width: min(100%, 320px); }
+.entrada--fecha { width: auto; min-width: 200px; }
+.entrada--linea:focus-visible { outline: none; }
+/* el subrayado se llena desde el centro al escribir */
+.pregunta__campo:has(> .entrada--linea:focus) { position: relative; }
+
+.opciones { display: grid; gap: var(--e1); }
+.opcion {
+  position: relative; display: flex; align-items: center; gap: var(--e3); min-height: 44px; padding: var(--e1) var(--e3) var(--e1) var(--e2);
+  margin-left: calc(-1 * var(--e2)); border-radius: var(--r-m); cursor: pointer; transition: background-color var(--d-rapida) ease;
+}
+@media (hover: hover) { .opcion:hover:not(:has(input:disabled)) { background: var(--a-velo); } }
+.opcion input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.opcion__texto { overflow-wrap: anywhere; }
+.opcion__marca {
+  position: relative; display: grid; place-items: center; width: 22px; height: 22px; flex: none;
+  border: 2px solid var(--linea-fuerte); border-radius: 50%; background: var(--hoja);
+  transition: border-color var(--d-rapida) ease, background-color var(--d) var(--suave);
+}
+/* el punto de la opción única es una gota que cae dentro */
+.opcion__marca::after {
+  content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--a);
+  box-shadow: inset 0 1.5px 0 oklch(100% 0 0 / .55);
+  transform: scale(0) translateY(-6px); transition: transform 320ms var(--gota);
+}
+.opcion input:checked + .opcion__marca { border-color: var(--a); }
+.opcion input:checked + .opcion__marca::after { transform: none; }
+.opcion__marca--caja { border-radius: 7px; }
+.opcion__marca--caja::after { display: none; }
+.opcion__marca--caja .icono { width: 14px; height: 14px; stroke-width: 3; color: var(--a-texto); stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 260ms var(--suave) 60ms; }
+.opcion input:checked + .opcion__marca--caja { background: var(--a); }
+.opcion input:checked + .opcion__marca--caja .icono { stroke-dashoffset: 0; }
+.opcion input:focus-visible + .opcion__marca { outline: 2px solid var(--a); outline-offset: 3px; }
+.opcion input:disabled { cursor: default; }
+.opcion:has(input:disabled) { cursor: default; }
+.opcion--otro .opcion__otro-texto { flex: 1; min-width: 0; }
+.quitar-eleccion { margin-top: var(--e2); padding: var(--e2) var(--e3); border: 0; border-radius: var(--pastilla); background: transparent; color: var(--tinta-3); font-size: var(--t-s); font-weight: 600; }
+@media (hover: hover) { .quitar-eleccion:hover { background: var(--a-velo); color: var(--tinta); } }
+
+/* escala: una fila de gotas numeradas */
+.escala { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--e3); }
+.escala__puntos { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: var(--e1); }
+.escala__punto { position: relative; display: grid; place-items: center; cursor: pointer; }
+.escala__punto input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.escala__punto span {
+  display: grid; place-items: center; width: 44px; height: 44px; max-width: 100%; aspect-ratio: 1; border-radius: 50%;
+  border: 2px solid var(--linea-fuerte); background: var(--hoja); font-weight: 600; font-variant-numeric: tabular-nums;
+  transition: background-color var(--d) var(--suave), border-color var(--d-rapida), color var(--d-rapida), transform 300ms var(--gota);
+}
+@media (hover: hover) { .escala__punto:hover input:not(:disabled) + span { border-color: var(--a); } }
+.escala__punto input:checked + span { background: var(--a); border-color: var(--a); color: var(--a-texto); transform: scale(1.08); box-shadow: inset 0 2px 0 oklch(100% 0 0 / .4); }
+.escala__punto input:focus-visible + span { outline: 2px solid var(--a); outline-offset: 3px; }
+.escala__etiqueta { font-size: var(--t-s); color: var(--tinta-2); max-width: 14ch; }
+.escala__etiqueta--fin { text-align: right; }
+@media (max-width: 560px) {
+  .escala { grid-template-columns: 1fr 1fr; }
+  .escala__puntos { grid-column: 1 / -1; grid-row: 1; }
+  .escala__punto span { width: 100%; height: auto; }
+}
+
+/* valoración: una fila de círculos que se rellenan */
+.valoracion { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e1); }
+.valoracion__punto { position: relative; display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
+.valoracion__punto input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.valoracion__punto input:focus-visible + .punto { outline: 2px solid var(--a); outline-offset: 3px; }
+.punto {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--linea-fuerte); background: var(--hoja-honda);
+  transition: background-color var(--d) var(--suave), border-color var(--d) var(--suave);
+}
+.punto--lleno { background: var(--a); border-color: var(--a); box-shadow: inset 0 2px 0 oklch(100% 0 0 / .4); }
+.valoracion__cifra { margin-left: var(--e2); font-size: var(--t-s); color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+
+.respuesta-texto { white-space: pre-line; overflow-wrap: anywhere; padding: var(--e2) 0; border-bottom: 1.5px dotted var(--linea-fuerte); }
+.sin-respuesta { color: var(--tinta-3); font-style: italic; }
+
+/* ---------- el hilo de progreso: un tubo que se llena de agua ---------- */
+.hilo {
+  position: sticky; top: var(--e3); z-index: 20; display: flex; align-items: center; gap: var(--e3);
+  padding: var(--e2) var(--e4); border-radius: var(--pastilla);
+}
+.hilo__tubo { position: relative; flex: 1; height: 10px; border-radius: var(--pastilla); background: var(--hoja-honda); overflow: hidden; box-shadow: inset 0 1px 3px oklch(0% 0 0 / .12); }
+.hilo__agua {
+  position: absolute; inset: 0; border-radius: inherit; transform-origin: left; transform: scaleX(var(--p, 0));
+  background: linear-gradient(90deg, oklch(calc(var(--a-l) + 16%) var(--a-c) var(--h)), var(--a));
+  transition: transform 600ms var(--gota);
+}
+.hilo__agua::after {
+  content: ""; position: absolute; inset: 1px 0 auto; height: 3px; border-radius: 3px;
+  background: linear-gradient(90deg, transparent, oklch(100% 0 0 / .7) 40%, transparent 60%) 0 0 / 200% 100%;
+  animation: ola 2.8s linear infinite;
+}
+@keyframes ola { to { background-position: -200% 0; } }
+.hilo__texto { font-size: var(--t-xs); font-weight: 600; color: var(--tinta-2); font-variant-numeric: tabular-nums; min-width: 9ch; text-align: right; }
+
+/* ---------- pie de navegación ---------- */
+.navegacion { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e3); padding: var(--e2) 0 var(--e7); }
+.navegacion__hueco { flex: 1; }
+.navegacion .boton--primario { min-width: 140px; }
+
+/* ---------- final: la gota cae y salpica ---------- */
+.final { position: relative; text-align: left; overflow: visible; }
+.final__onda { position: absolute; left: 50%; top: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; border: 2px solid var(--a); pointer-events: none; opacity: 0; }
+.final .titulo-gota { font-size: var(--t-xxl); }
+.final p { margin-top: var(--e3); color: var(--tinta-2); white-space: pre-line; }
+.final__acciones { display: flex; flex-wrap: wrap; gap: var(--e3); margin-top: var(--e5); }
+
+.pie-legal { padding: 0 0 var(--e7); text-align: center; font-size: var(--t-xs); color: var(--tinta-3); }
+.pie-legal a { color: inherit; }
+
+@media (max-width: 560px) {
+  .cabecera, .pregunta { padding-left: var(--e5); padding-right: var(--e5); }
+  .columna { width: calc(100% - 2 * var(--e3)); gap: var(--e3); }
+}
+
+/* la gota que sigue a la pregunta: en el móvil, pegada al borde sin salirse */
+.columna > .gota-marca { left: -14px; }
+@media (max-width: 560px) { .columna > .gota-marca { left: -9px; width: 5px; } }
